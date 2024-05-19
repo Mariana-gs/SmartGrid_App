@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:smart_grid/screens/home_screen.dart';
 
-
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -30,8 +28,6 @@ void dispose(){
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,overlays: SystemUiOverlay.values);
   super.dispose();
 }
-
-
 
   @override
   Widget build(BuildContext context) {
