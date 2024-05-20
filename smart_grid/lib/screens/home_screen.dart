@@ -1,6 +1,7 @@
 import 'dart:html';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:smart_grid/screens/search.dart';
@@ -32,6 +33,13 @@ class _HomeScreenState extends State<HomeScreen> {
     'Adicionar Item',
   ];
 
+  List<String> _lembretes = [
+    'Lembrete 1',
+    'Lembrete 2',
+    'Lembrete 3',
+  ];
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.yellow,
+                        color: Color(0xFFA988F9),
                         width: 2.0,
                       )),
                 )
@@ -126,9 +134,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: IndexedStack(
-        index: _bottomNavIndex,
-      ),
+      
+      
+      
+      
       /*floatingActionButton: FloatingActionButton(
           //mini: false,
           backgroundColor: Color(0xFFA988F9),
@@ -180,7 +189,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),),
             
             ElevatedButton(
-              
               //busca
               style: ElevatedButton.styleFrom(
                 fixedSize: Size(72, 72),
@@ -189,7 +197,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 backgroundColor: Color(0xFFA988F9),
                 // Largura e altura fixas
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                context,
+                PageTransition(
+                    child: const search(),
+                    type: PageTransitionType.bottomToTop));
+              },
               child: Container(
                 
                 child: Image.asset(
@@ -228,6 +242,55 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+
+// =================== BODY
+
+      body: 
+      Column(
+      children: <Widget>[
+      Container(
+          //color: Colors.white,
+          child: Align(
+            alignment: Alignment.topLeft, // Alinha o conteúdo à esquerda
+            child: Padding(
+              padding: const EdgeInsets.all(22.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Meus Lembretes',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                      foregroundColor: Colors.transparent,
+                      backgroundColor: Colors.transparent,
+                    ),
+                    onPressed: () {}, child: Text('Ver Mais >', style: TextStyle(
+                        color: Color(0xFFA988F9),
+                        
+                      ),),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      
+      
+
+
+
+      ],
+      )
+
+
     );
   }
 }
