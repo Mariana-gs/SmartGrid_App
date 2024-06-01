@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:smart_grid/screens/search.dart';
+import 'package:smart_grid/screens/reports.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -174,7 +175,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundColor: Colors.yellow,
                   // Largura e altura fixas
                 ),
-                onPressed: () {},
+                onPressed: () {
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        child: const reports(),
+                        type: PageTransitionType.bottomToTop));
+              },
                 child: Container(
                   //margin: EdgeInsets.only(right: 24.0),
                   child: Image.asset(
@@ -225,7 +232,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundColor: Colors.yellow,
                   // Largura e altura fixas
                 ),
-                onPressed: () {},
+                onPressed: () {
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        child: const search(),
+                        type: PageTransitionType.bottomToTop));
+              },
                 child: Container(
                   //margin: EdgeInsets.only(right: 24.0),
                   child: Image.asset(
