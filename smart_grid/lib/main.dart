@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:smart_grid/screens/splash_screen.dart';
 import 'package:device_preview/device_preview.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 
 void main() {
   runApp(
@@ -10,6 +13,11 @@ void main() {
     ),
   );
 }
+
+await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
