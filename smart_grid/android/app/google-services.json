@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "955871740032",
+    "firebase_url": "https://drawer-57cde-default-rtdb.firebaseio.com",
+    "project_id": "drawer-57cde",
+    "storage_bucket": "drawer-57cde.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955871740032:android:4ec9c95ae293bcf464a665",
+        "android_client_info": {
+          "package_name": "com.example.smart_grid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3xdZCoqA7i79xNLPkFOGy4hk7b2aqJGQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
