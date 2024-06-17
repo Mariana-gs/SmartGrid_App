@@ -1,4 +1,4 @@
-import 'dart:html';
+//import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -6,6 +6,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:smart_grid/screens/search.dart';
 import 'package:smart_grid/screens/reports.dart';
+import 'package:smart_grid/screens/additem.dart';
+
+
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -236,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                     context,
                     PageTransition(
-                        child: const search(),
+                        child: const additem(),
                         type: PageTransitionType.bottomToTop));
               },
                 child: Container(
@@ -392,7 +396,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                             )
-
                             /*Positioned(
                                   bottom: 15,
                                   right: 20,
@@ -487,8 +490,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     //color: Colors.yellow,
                                     borderRadius: BorderRadius.circular(50),
                                   ),*/
-                                )),
-
+                                ),
+                                ),
                             /*Positioned(
                                   bottom: 15,
                                   right: 20,
@@ -498,8 +501,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(24),
                                     ),
-
-                                )
+                                  )
                                 )*/
                           ],
                         ),
