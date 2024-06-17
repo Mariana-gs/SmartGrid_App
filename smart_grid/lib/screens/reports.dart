@@ -59,7 +59,7 @@ class _reportsState extends State<reports> {
             Align(
                 alignment: Alignment.topLeft, // Alinha o conteúdo à esquerda
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 22.0),
+                  padding: const EdgeInsets.only(left: 22.0, bottom: 24),
                   child: Text(
                     'Uso De Gavetas',
                     style: TextStyle(
@@ -69,6 +69,8 @@ class _reportsState extends State<reports> {
                     ),
                   ),
                 )),
+            
+            
             Row(
               children: [
                 Container(
@@ -83,9 +85,6 @@ class _reportsState extends State<reports> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              //Image.asset('assets/images/presilhas.jpeg',
-                              //width: 100,
-                              //height: 100,
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(
                                     50), // Define o raio das bordas arredondadas
@@ -105,18 +104,34 @@ class _reportsState extends State<reports> {
                             ],
                           )),
                       Positioned(
-                        top: 10,
-                        left: 100,
+                        top:20,
+                        left: 15,
                         child: Container(
-                          //margin: const EdgeInsets.only(
-                          // left: 100, top: 10),
                           child: Column(
                             children: [
                               Text(
-                                'Presilhas',
+                                '56%',
                                 style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 22,
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top:75,
+                        left: 20,
+                        child: Container(
+                          child: Column(
+                            children: [
+                              Text(
+                                'E5',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
                                   fontFamily: 'Inter',
                                 ),
                               ),
@@ -134,9 +149,179 @@ class _reportsState extends State<reports> {
                       width: 2, // Largura da borda
                     ),
                   ),
-                )
+                ),
+                Spacer(),
+                Container(
+                  height: 120,
+                  width: 72,
+                  margin: const EdgeInsets.only(left: 0),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                          top: 0,
+                          left: 0,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                    50), // Define o raio das bordas arredondadas
+                                child: Container(
+                                  width: 68.0, // Largura da imagem
+                                  height: 68.0, // Altura da imagem
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFF1B1B1D),
+                                    borderRadius: BorderRadius.circular(50),
+                                    border: Border.all(
+                                      color: Color(0xFFA988F9), // Cor da borda
+                                      width: 2, // Largura da borda
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )),
+                      Positioned(
+                        top:20,
+                        left: 15,
+                        child: Container(
+                          child: Column(
+                            children: [
+                              Text(
+                                '56%',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top:75,
+                        left: 20,
+                        child: Container(
+                          child: Column(
+                            children: [
+                              Text(
+                                'E5',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF1B1B1D),
+                    borderRadius: BorderRadius.circular(60),
+                    border: Border.all(
+                      color: Color(0xFF4E4E4E), // Cor da borda
+                      width: 2, // Largura da borda
+                    ),
+                  ),
+                ),
+                Spacer(),
+                Container(
+                  height: 120,
+                  width: 72,
+                  margin: const EdgeInsets.only(right: 24),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                          top: 0,
+                          left: 0,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                    50), // Define o raio das bordas arredondadas
+                                child: Container(
+                                  width: 68.0, // Largura da imagem
+                                  height: 68.0, // Altura da imagem
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFF1B1B1D),
+                                    borderRadius: BorderRadius.circular(50),
+                                    border: Border.all(
+                                      color: Color(0xFFA988F9), // Cor da borda
+                                      width: 2, // Largura da borda
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )),
+                      Positioned(
+                        top:20,
+                        left: 15,
+                        child: Container(
+                          child: Column(
+                            children: [
+                              Text(
+                                '56%',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top:75,
+                        left: 20,
+                        child: Container(
+                          child: Column(
+                            children: [
+                              Text(
+                                'E5',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF1B1B1D),
+                    borderRadius: BorderRadius.circular(60),
+                    border: Border.all(
+                      color: Color(0xFF4E4E4E), // Cor da borda
+                      width: 2, // Largura da borda
+                    ),
+                  ),
+                ),
+                
               ],
-            )
+            ),
+            Align(
+                alignment: Alignment.topLeft, // Alinha o conteúdo à esquerda
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 24.0, bottom: 24, left: 24),
+                  child: Text(
+                    'Itens Mais Acessados',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                )),
           ],
         ));
   }
