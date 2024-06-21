@@ -90,4 +90,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'drawer-57cde.appspot.com',
     measurementId: 'G-9S3NXX2Z2J',
   );
+
 }

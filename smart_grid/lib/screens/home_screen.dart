@@ -2,6 +2,10 @@
 //import 'dart:html';
 
 
+import 'dart:async';
+//import 'dart:ffi';
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,6 +14,7 @@ import 'package:smart_grid/screens/search.dart';
 import 'package:smart_grid/screens/reports.dart';
 import 'package:smart_grid/screens/additem.dart';
 
+import 'package:firebase_database/firebase_database.dart';
 
 
 
@@ -22,6 +27,36 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _bottomNavIndex = 0;
+  int drawer = 2;
+
+  late final DatabaseReference _drawerRef;
+  late StreamSubscription<DatabaseEvent> _drawerSubscription;
+
+  @override
+  void initState(){
+    super.initState();
+    init();
+  }
+
+  init () async{
+    _drawerRef = FirebaseDatabase.instance.ref('drawer/config/id_drawer');
+    try{
+      final drawerSnapshot = await _drawerRef.get();
+      drawer = drawerSnapshot.value as int;
+    }catch(err){
+      debugPrint(err.toString());
+    }
+
+    _drawerSubscription = _drawerRef.onValue.listen((DatabaseEvent event) { 
+      setState(() {
+        drawer = (event.snapshot.value ?? 0) as int;
+      });
+    });
+  }
+
+  adddrawer() async{
+    await _drawerRef.set(ServerValue.increment(1));
+  }
 
   //List of the pages
   List<Widget> pages = const [
@@ -95,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             //NOME DO USUÁRIO
-            Text('Olá, Mari!',
+            Text(drawer.toString(),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -108,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Stack(children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      fixedSize: Size(48, 48),
+                      //fixedSize: Size(48, 48),
                       padding: EdgeInsets.all(0),
                       shape: CircleBorder(),
                       backgroundColor: Color(0xFFA988F9),
@@ -181,13 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundColor: Colors.yellow,
                   // Largura e altura fixas
                 ),
-                onPressed: () {
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        child: const reports(),
-                        type: PageTransitionType.bottomToTop));
-              },
+                onPressed: adddrawer,
                 child: Container(
                   //margin: EdgeInsets.only(right: 24.0),
                   child: Image.asset(
