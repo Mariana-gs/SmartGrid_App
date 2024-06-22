@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -11,12 +13,54 @@ class search extends StatefulWidget {
 }
 
 class _searchState extends State<search> {
+
+  late DatabaseReference _databaseReference;
+  String _searchQuery = '';
+  List<Map<dynamic, dynamic>> _searchResults = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicialize a referência ao nó 'drawers'
+    _databaseReference = FirebaseDatabase.instance.ref().child('drawer/drawers');
+  }
+  
+  
+  void _searchItems(String query) async {
+    final snapshot = await _databaseReference.get();
+    if (snapshot.exists) {
+      Map<dynamic, dynamic> drawers = snapshot.value as Map<dynamic, dynamic>;
+      List<Map<dynamic, dynamic>> results = [];
+
+      drawers.forEach((drawerKey, drawerData) {
+        Map<dynamic, dynamic> items = drawerData['itens'] as Map<dynamic, dynamic>;
+        items.forEach((itemId, itemData) {
+          if (itemData['name'].toString().toLowerCase().contains(query.toLowerCase())) {
+            results.add({
+              'drawerId': drawerData['drawer_id'], // Pegue o 'drawer_id'
+              'drawerData': drawerData,
+              'itemId': itemId,
+              'itemData': itemData
+            });
+          }
+        });
+      });
+
+      setState(() {
+        _searchResults = results;
+      });
+    }
+  }
+
+  void _updateDrawerId(int drawerId) async {
+    DatabaseReference configRef = FirebaseDatabase.instance.ref().child('drawer/config');
+    await configRef.update({'id_drawer': drawerId});
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-    String name;
-
+   
     return Scaffold(
       backgroundColor: Color(0xFF1B1B1D),
       body: Column(
@@ -57,26 +101,31 @@ class _searchState extends State<search> {
               ),
             ),
           ),
+
+
           Padding(
             padding: EdgeInsets.only(left: 50, right: 50, top:22),
             child: Container(child: TextField(
-                  onChanged: (val){
-                    setState((){
-                      name = val;
-                    });
+                  onChanged: (value){
+
+                   setState(() {
+                  _searchQuery = value;
+                  _searchItems(_searchQuery);
+                   });
                   },
                   decoration: const InputDecoration(prefixIcon: Icon(Icons.search, color: Colors.black),
                     //contentPadding: EdgeInsets.only(top: 22, left: 500, right: 100, bottom: 22),
                    hintStyle: TextStyle(color: Colors.black, fontFamily: 'Inter'),
                    hintText: 'Search',
-                   
                     ),
                 ),
                 
-                decoration: BoxDecoration(
+              decoration: BoxDecoration(
               color: Color(0xFFA988F9),
               borderRadius: BorderRadius.circular(100),
-            ), ),),
+            ), 
+            ),
+            ),
           
           
           /*Container(
@@ -101,20 +150,95 @@ class _searchState extends State<search> {
               borderRadius: BorderRadius.circular(100),
             ),
           ),*/
-          SingleChildScrollView(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('/drawer/drawers').snapshots(),
-              builder: (context, snapshots){
-                return (snapshots.connectionState == ConnectionState.waiting)?
-                Center(
-                  child: CircularProgressIndicator(),
-                ):ListView.builder(itemCount: snapshots.data!.docs.length, 
-                itemBuilder: (context, index){
-                  var data = snapshots.data!.docs[index].data() as Map
+         
+           SizedBox(height: 16.0),
+            
 
-                },);
-              }
-            )
+
+           Expanded(
+              child: ListView.builder(
+                itemCount: _searchResults.length,
+                itemBuilder: (context, index) {
+                  var result = _searchResults[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
+                    child: Card(
+                      color: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: Color(0xFF4E4E4E), width: 1),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  result['itemData']['name'],
+                                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Color(0xFF4E4E4E)),
+                                  ),
+                                  child: Text(
+                                    'Gaveta ${result['drawerId']}',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              result['itemData']['description'],
+                              style: TextStyle(color: Colors.white, fontSize: 14),
+                            ),
+                            SizedBox(height: 16),
+                            Divider(color: Colors.white), // Linha divisória branca
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                TextButton.icon(
+                                  icon: Icon(Icons.search, color: Colors.white),
+                                  label: Text('Achar', style: TextStyle(color: Colors.white)),
+                                  onPressed: () {
+                                    // Ação ao clicar no botão de achar o item
+                                     _updateDrawerId(result['drawerId']);
+                                    print('Achar item: ${result['itemData']['name']}');
+                                  },
+                                ),
+                                TextButton.icon(
+                                  icon: Icon(Icons.edit, color: Colors.white),
+                                  label: Text('Editar', style: TextStyle(color: Colors.white)),
+                                  onPressed: () {
+                                    // Ação ao clicar no botão de editar o item
+                                    print('Editar item: ${result['itemData']['name']}');
+                                  },
+                                ),
+                                TextButton.icon(
+                                  icon: Icon(Icons.delete, color: Colors.white),
+                                  label: Text('Excluir', style: TextStyle(color: Colors.white)),
+                                  onPressed: () {
+                                    // Ação ao clicar no botão de excluir o item
+                                    print('Excluir item: ${result['itemData']['name']}');
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ), // Expanded termina aqui
             
             
             
@@ -237,7 +361,8 @@ class _searchState extends State<search> {
               ),
             ],
           )*/
-          ),
+    
+          
         ],
       ),
     );
