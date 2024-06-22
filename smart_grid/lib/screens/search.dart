@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -13,6 +15,7 @@ class _searchState extends State<search> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
+    String name;
 
     return Scaffold(
       backgroundColor: Color(0xFF1B1B1D),
@@ -54,40 +57,68 @@ class _searchState extends State<search> {
               ),
             ),
           ),
-          Container(
+          Padding(
+            padding: EdgeInsets.only(left: 50, right: 50, top:22),
+            child: Container(child: TextField(
+                  onChanged: (val){
+                    setState((){
+                      name = val;
+                    });
+                  },
+                  decoration: const InputDecoration(prefixIcon: Icon(Icons.search, color: Colors.black),
+                    //contentPadding: EdgeInsets.only(top: 22, left: 500, right: 100, bottom: 22),
+                   hintStyle: TextStyle(color: Colors.black, fontFamily: 'Inter'),
+                   hintText: 'Search',
+                   
+                    ),
+                ),
+                
+                decoration: BoxDecoration(
+              color: Color(0xFFA988F9),
+              borderRadius: BorderRadius.circular(100),
+            ), ),),
+          
+          
+          /*Container(
             padding: EdgeInsets.all(23),
             height: 80,
             width: 312,
             child: Row(
               children: [
-                Text('Search', style: TextStyle(
-                          fontSize: 24,
-                          color: Colors.black,
-                          fontFamily: 'Inter')),
-                Spacer(),
+                
+                /*Spacer(),
                 Image.asset(
                   // Use Image.asset para carregar uma imagem local
                   'assets/images/search.png', // Caminho da imagem
                   width: 27, // Largura da imagem
                   height: 27, // Altura da imagem
-                ),
-                /*TextField(
-                  onChanged: (context){},
-                  decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.all(22),
-                   hintStyle: TextStyle(color: Colors.white, fontFamily: 'Inter'),
-                   hintText: 'Search',
-                  )
-                )*/
+                ),*/
+                
               ],
             ),
             decoration: BoxDecoration(
               color: Color(0xFFA988F9),
               borderRadius: BorderRadius.circular(100),
             ),
-          ),
+          ),*/
           SingleChildScrollView(
-              child: Column(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('/drawer/drawers').snapshots(),
+              builder: (context, snapshots){
+                return (snapshots.connectionState == ConnectionState.waiting)?
+                Center(
+                  child: CircularProgressIndicator(),
+                ):ListView.builder(itemCount: snapshots.data!.docs.length, 
+                itemBuilder: (context, index){
+                  var data = snapshots.data!.docs[index].data() as Map
+
+                },);
+              }
+            )
+            
+            
+            
+            /*Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
@@ -205,7 +236,7 @@ class _searchState extends State<search> {
                     }),
               ),
             ],
-          )
+          )*/
           ),
         ],
       ),
