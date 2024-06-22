@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:smart_grid/screens/home_screen.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,9 +15,11 @@ class search extends StatefulWidget {
 
 class _searchState extends State<search> {
 
+  
   late DatabaseReference _databaseReference;
   String _searchQuery = '';
   List<Map<dynamic, dynamic>> _searchResults = [];
+  int _searchCount = 0;
 
   @override
   void initState() {
@@ -26,36 +29,67 @@ class _searchState extends State<search> {
   }
   
   
-  void _searchItems(String query) async {
-    final snapshot = await _databaseReference.get();
-    if (snapshot.exists) {
-      Map<dynamic, dynamic> drawers = snapshot.value as Map<dynamic, dynamic>;
-      List<Map<dynamic, dynamic>> results = [];
+ void _searchItems(String query) async {
+  int searchCount = 0;
+  final snapshot = await _databaseReference.get();
+  if (snapshot.exists) {
+    Map<dynamic, dynamic> drawers = snapshot.value as Map<dynamic, dynamic>;
+    List<Map<dynamic, dynamic>> results = [];
 
-      drawers.forEach((drawerKey, drawerData) {
-        Map<dynamic, dynamic> items = drawerData['itens'] as Map<dynamic, dynamic>;
-        items.forEach((itemId, itemData) {
-          if (itemData['name'].toString().toLowerCase().contains(query.toLowerCase())) {
-            results.add({
-              'drawerId': drawerData['drawer_id'], // Pegue o 'drawer_id'
-              'drawerData': drawerData,
-              'itemId': itemId,
-              'itemData': itemData
-            });
-          }
-        });
+    drawers.forEach((drawerKey, drawerData) {
+      Map<dynamic, dynamic> items = drawerData['itens'] as Map<dynamic, dynamic>;
+      items.forEach((itemId, itemData) {
+        if (itemData['name'].toString().toLowerCase().contains(query.toLowerCase()) &&
+            itemData['name'].isNotEmpty) {
+          results.add({
+            'drawerId': drawerData['drawer_id'], // Pegue o 'drawer_id'
+            'drawerData': drawerData,
+            'itemId': itemId,
+            'itemData': itemData
+          });
+          searchCount++;
+        }
       });
+    });
 
-      setState(() {
-        _searchResults = results;
-      });
-    }
+    setState(() {
+      _searchResults = results;
+      _searchCount = searchCount;
+    });
   }
+}
+
+  void _deleteItem(String itemName) async {
+  DatabaseReference drawersRef = FirebaseDatabase.instance.ref().child('drawer/drawers');
+
+  final snapshot = await drawersRef.get();
+  if (snapshot.exists) {
+    Map<dynamic, dynamic> drawers = snapshot.value as Map<dynamic, dynamic>;
+
+    drawers.forEach((drawerKey, drawerData) {
+      Map<dynamic, dynamic> items = drawerData['itens'] as Map<dynamic, dynamic>;
+
+      items.forEach((itemId, itemData) {
+        if (itemData['name'].toString().toLowerCase() == itemName.toLowerCase()) {
+          drawersRef.child('$drawerKey/itens/$itemId').remove().then((_) {
+            // Após a exclusão, atualize os resultados de pesquisa
+            setState(() {
+              _searchResults.removeWhere((result) => result['itemData']['name'].toString().toLowerCase() == itemName.toLowerCase());
+            });
+            _searchItems(_searchQuery);
+          });
+        }
+      });
+    });
+  }
+}
+
 
   void _updateDrawerId(int drawerId) async {
     DatabaseReference configRef = FirebaseDatabase.instance.ref().child('drawer/config');
     await configRef.update({'id_drawer': drawerId});
   }
+
 
 
   @override
@@ -80,7 +114,12 @@ class _searchState extends State<search> {
                       width: 48,
                       margin: EdgeInsets.only(right: 24),
                       child: IconButton(
-                      onPressed: ((){}), 
+                      onPressed: ((){
+                        Navigator.push(
+                         context,
+                         MaterialPageRoute(builder: (context) => HomeScreen()), // Direciona para a Home Page
+                         );
+                      }), 
                       icon: Icon(Icons.arrow_back_ios_new_rounded, ), padding: EdgeInsets.only(right: 3)),
                       decoration: BoxDecoration(
                         color: Color(0xFFF4EFE9),
@@ -88,7 +127,7 @@ class _searchState extends State<search> {
                       ),
                     ),
                     Text(
-                        '13 Resultados',
+                        _searchCount.toString() + ' Resultados',
                         style: TextStyle(
                           fontSize: 24,
                           color: Color(0xFFF4EFE9),
@@ -226,6 +265,8 @@ class _searchState extends State<search> {
                                   label: Text('Excluir', style: TextStyle(color: Colors.white)),
                                   onPressed: () {
                                     // Ação ao clicar no botão de excluir o item
+                                     _deleteItem(result['itemData']['name']);
+
                                     print('Excluir item: ${result['itemData']['name']}');
                                   },
                                 ),

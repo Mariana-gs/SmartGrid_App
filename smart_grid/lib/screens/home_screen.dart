@@ -29,64 +29,83 @@ class _HomeScreenState extends State<HomeScreen> {
   int _bottomNavIndex = 0;
   int drawer = 2;
 
-  late final DatabaseReference _drawerRef;
-  late StreamSubscription<DatabaseEvent> _drawerSubscription;
+  late DatabaseReference _databaseReference;
+  List<Map<dynamic, dynamic>> _searchResults = [];
+  int _searchCount = 0;
+ 
+
+  void _loadItems() async {
+    final snapshot = await _databaseReference.get();
+    if (snapshot.exists) {
+      Map<dynamic, dynamic> drawers = snapshot.value as Map<dynamic, dynamic>;
+      List<Map<dynamic, dynamic>> results = [];
+
+      drawers.forEach((drawerKey, drawerData) {
+        Map<dynamic, dynamic> items = drawerData['itens'] as Map<dynamic, dynamic>;
+        items.forEach((itemId, itemData) {
+          results.add({
+            'drawerId': drawerData['drawer_id'],
+            'drawerData': drawerData,
+            'itemId': itemId,
+            'itemData': itemData
+          });
+        });
+      });
+
+      setState(() {
+        _searchResults = results;
+        _searchCount = results.length;
+      });
+    }
+  }
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    init();
+    _databaseReference = FirebaseDatabase.instance.ref().child('drawer/drawers');
+    _loadItems(); 
+    // Carrega os itens ao iniciar a tela
   }
 
-  init () async{
-    _drawerRef = FirebaseDatabase.instance.ref('drawer/config/id_drawer');
-    try{
-      final drawerSnapshot = await _drawerRef.get();
-      drawer = drawerSnapshot.value as int;
-    }catch(err){
-      debugPrint(err.toString());
-    }
 
-    _drawerSubscription = _drawerRef.onValue.listen((DatabaseEvent event) { 
-      setState(() {
-        drawer = (event.snapshot.value ?? 0) as int;
+  void _updateDrawerId(int drawerId) async {
+    DatabaseReference configRef = FirebaseDatabase.instance.ref().child('drawer/config');
+    await configRef.update({'id_drawer': drawerId});
+  }
+
+  void _deleteItem(String itemName) async {
+    DatabaseReference drawersRef = FirebaseDatabase.instance.ref().child('drawer/drawers');
+    final snapshot = await drawersRef.get();
+    if (snapshot.exists) {
+      Map<dynamic, dynamic> drawers = snapshot.value as Map<dynamic, dynamic>;
+
+      drawers.forEach((drawerKey, drawerData) {
+        Map<dynamic, dynamic> items = drawerData['itens'] as Map<dynamic, dynamic>;
+
+        items.forEach((itemId, itemData) {
+          if (itemData['name'].toString().toLowerCase() == itemName.toLowerCase()) {
+            drawersRef.child('$drawerKey/itens/$itemId').remove().then((_) {
+              setState(() {
+                _searchResults.removeWhere((result) => result['itemData']['name'].toString().toLowerCase() == itemName.toLowerCase());
+              });
+              _loadItems();
+            });
+          }
+        });
       });
-    });
+    }
   }
 
-  adddrawer() async{
-    await _drawerRef.set(ServerValue.increment(1));
-  }
+
+
+
+
 
   //List of the pages
   List<Widget> pages = const [
     HomeScreen(),
   ];
 
-  //List of pages icons
-  List<IconData> iconList = [
-    Icons.home,
-  ];
-
-  List<String> titleList = [
-    'Home',
-    'Relatórios',
-    'Pesquisa',
-    'Adicionar Item',
-  ];
-
-  List<String> _lembretes = [
-    'Lembrete 1',
-    'Lembrete 2',
-    'Lembrete 3',
-  ];
-
-  List<String> _grids = [
-    'Grid 1',
-    'Grid 2',
-    'Grid 3',
-    'Grid 4',
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -96,8 +115,44 @@ class _HomeScreenState extends State<HomeScreen> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
 
+
+
+void _loadItems() async {
+  
+    final snapshot = await _databaseReference.get();
+    if (snapshot.exists) {
+      Map<dynamic, dynamic> drawers = snapshot.value as Map<dynamic, dynamic>;
+      List<Map<dynamic, dynamic>> results = [];
+
+      drawers.forEach((drawerKey, drawerData) {
+        Map<dynamic, dynamic> items = drawerData['itens'] as Map<dynamic, dynamic>;
+        items.forEach((itemId, itemData) {
+          if(itemData['name'] != null && itemData['name'].toString().length > 1) {
+            results.add({
+              'drawerId': drawerData['drawer_id'],
+              'drawerData': drawerData,
+              'itemId': itemId,
+              'itemData': itemData
+            });
+          }
+        });
+      });
+
+      setState(() {
+        _searchResults = results;
+        _searchCount = results.length;
+      });
+    }
+  }
+
+    @override
+void initState() {
+  super.initState();
+  _loadItems(); // Chame a função para carregar os itens ao iniciar a tela
+}
     //TELA
 
+_loadItems();
     return Scaffold(
 
       backgroundColor: Color(0xFF1B1B1D),
@@ -130,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             //NOME DO USUÁRIO
-            Text(drawer.toString(),
+            Text('Olá, Mari!',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -216,7 +271,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundColor: Colors.yellow,
                   // Largura e altura fixas
                 ),
-                onPressed: adddrawer,
+                onPressed: (){}
+                
+              ,
                 child: Container(
                   //margin: EdgeInsets.only(right: 24.0),
                   child: Image.asset(
@@ -289,11 +346,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       
+
+
+
       
       // BODY =============================================== 
       
       body: Column(
-        children: <Widget>[
+        children: [
           Container(
             //Título
             //color: Colors.white,
@@ -306,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Meus Lembretes',
+                        'Meus Itens',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
@@ -321,9 +381,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         foregroundColor: Colors.transparent,
                         backgroundColor: Colors.transparent,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        _loadItems();
+                      },
                       child: Text(
-                        'Ver Tudo >',
+                        'Refresh',
                         style: TextStyle(
                           color: Color(0xFFA988F9),
                           fontFamily: 'Inter',
@@ -335,217 +397,107 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          SingleChildScrollView(
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 72,
-                child: ListView.builder(
-                    itemCount: _lembretes.length,
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        width: 288,
-                        margin: const EdgeInsets.only(left: 24),
-                        child: Stack(
-                          children: [
-                            Positioned(
-                                top: 10,
-                                right: 0,
-                                child: Container(
-                                  height: 50,
-                                  width: 50,
-                                  child: IconButton(
-                                      onPressed: null,
-                                      icon: Icon(Icons.more_vert)),
-                                  decoration: BoxDecoration(
-                                    //color: Colors.yellow,
-                                    borderRadius: BorderRadius.circular(50),
-                                  ),
-                                )),
-                            Positioned(
-                                bottom: 0,
-                                left: 0,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    //Image.asset('assets/images/presilhas.jpeg',
-                                    //width: 100,
-                                    //height: 100,
-//),
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(
-                                          24.0), // Define o raio das bordas arredondadas
-                                      child: Image.asset(
-                                        'assets/images/presilhas.jpeg', // Caminho para sua imagem
-                                        width: 72.0, // Largura da imagem
-                                        height: 72.0, // Altura da imagem
-                                        fit: BoxFit
-                                            .cover, // Ajusta a imagem para cobrir a área
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                            Positioned(
-                              top: 10,
-                              left: 100,
-                              child: Container(
-                                //margin: const EdgeInsets.only(
-                                // left: 100, top: 10),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'Presilhas',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 22,
-                                        fontFamily: 'Inter',
-                                      ),
-                                    ),
-                                  ],
+          //SizedBox(height: 16.0),
+           
+
+            Expanded(
+            child: ListView.builder(
+              itemCount: _searchCount,
+              itemBuilder: (context, index) {
+                var result = _searchResults[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
+                  child: Card(
+                    color: Color(0xFFF4EFE9), // Cor de fundo alterada para F4EFE9
+                    elevation: 0, // Removida a elevação do card
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24), // Borda arredondada
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                result['itemData']['name'],
+                                style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.white), // Borda branca
+                                ),
+                                child: Text(
+                                  'Gaveta ${result['drawerId']}',
+                                  style: TextStyle(color: Colors.black),
                                 ),
                               ),
-                            ),
-                            Positioned(
-                              top: 32,
-                              left: 90,
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: null,
-                                    icon: Icon(Icons.alarm),
-                                    iconSize: 18,
-                                  ),
-                                  Text('2:00'),
-                                  IconButton(
-                                    onPressed: null,
-                                    icon: Icon(Icons.apps),
-                                    iconSize: 18,
-                                  ),
-                                  Text('1 un'),
-                                ],
+                            ],
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            result['itemData']['description'],
+                            style: TextStyle(color: Colors.black, fontSize: 14),
+                          ),
+                          SizedBox(height: 16),
+                          Divider(color: Colors.white), // Linha divisória branca
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              TextButton.icon(
+                                icon: Icon(Icons.search, color: Colors.black), // Ícone preto
+                                label: Text('Achar', style: TextStyle(color: Colors.black)),
+                                onPressed: () {
+                                  _updateDrawerId(result['drawerId']);
+                                  print('Achar item: ${result['itemData']['name']}');
+                                },
                               ),
-                            )
-                            /*Positioned(
-                                  bottom: 15,
-                                  right: 20,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(24),
-                                    ),
-                                )
-                                )*/
-                          ],
-                        ),
-                        decoration: BoxDecoration(
-                            color: Color(0xFFF4EFE9),
-                            borderRadius: BorderRadius.circular(24)),
-                      );
-                    }),
-              ),
-            ],
-          )
-          ),
-          Container(
-            //Título
-            //color: Colors.white,
-            child: Align(
-              alignment: Alignment.topLeft, // Alinha o conteúdo à esquerda
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    bottom: 15.0, left: 22.0, right: 22.0, top: 30),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Minhas Grids',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontFamily: 'Inter',
-                        ),
+                              TextButton.icon(
+                                icon: Icon(Icons.edit, color: Colors.black), // Ícone preto
+                                label: Text('Editar', style: TextStyle(color: Colors.black)),
+                                onPressed: () {
+                                  print('Editar item: ${result['itemData']['name']}');
+                                },
+                              ),
+                              TextButton.icon(
+                                icon: Icon(Icons.delete, color: Colors.black), // Ícone preto
+                                label: Text('Excluir', style: TextStyle(color: Colors.black)),
+                                onPressed: () {
+                                  _deleteItem(result['itemData']['name']);
+                                  print('Excluir item: ${result['itemData']['name']}');
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        shadowColor: Colors.transparent,
-                        foregroundColor: Colors.transparent,
-                        backgroundColor: Colors.transparent,
-                      ),
-                      onPressed: () {},
-                      child: Text(
-                        'Ver Tudo >',
-                        style: TextStyle(
-                          color: Color(0xFFA988F9),
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
-          ),
-          SingleChildScrollView(
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                //width: ,
-                height: height * 0.42,
-                child: ListView.builder(
-                    itemCount: _lembretes.length,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        height: 144,
-                        width: 312,
-                        margin: const EdgeInsets.only(
-                            left: 24, right: 24, bottom: 24),
-                        child: Stack(
-                          children: [
-                            Positioned(
-                                top: 10,
-                                right: 0,
-                                child: Container(
-                                  height: 0,
-                                  width: 6,
-                                  /*child: IconButton(
-                                      onPressed: null,
-                                      icon: Icon(Icons.more_vert)),
-                                  decoration: BoxDecoration(
-                                    //color: Colors.yellow,
-                                    borderRadius: BorderRadius.circular(50),
-                                  ),*/
-                                ),
-                                ),
-                            /*Positioned(
-                                  bottom: 15,
-                                  right: 20,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(24),
-                                    ),
-                                  )
-                                )*/
-                          ],
-                        ),
-                        decoration: BoxDecoration(
-                            color: Color(0xFFF4EFE9),
-                            borderRadius: BorderRadius.circular(24)),
-                      );
-                    }),
-              ),
-            ],
-          )),
-        ],
-      ),
+          ), // Fim do Expanded
+
+
+
+        ]
+
+      )
+
+      
+      
+     
+      
+      
+     
     );
   }
+  
+ 
 }
+
