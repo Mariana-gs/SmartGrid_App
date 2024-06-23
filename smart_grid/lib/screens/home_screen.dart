@@ -18,17 +18,26 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-
+import 'package:smart_grid/screens/AuthManager.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  HomeScreen(Key? key) : super (key: key);
+  
+  final User? user = Auth().currentUser;
 
+  
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+Future<void> signOut()async {
+    await Auth().signOut();
+  }
+
 
 
   void _navigateToSearchScreen() {
@@ -47,6 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> notificationsList = [];
   //SharedPreferences prefs = await SharedPreferences.getInstance();
 
+
+  
 
   void _addNotification(String mensagem) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -131,6 +142,31 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+void _showLogoutPopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Logout'),
+          content: Text('Tem certeza de que deseja sair?'),
+          actions: [
+            TextButton(
+              onPressed: signOut,
+
+              
+              child: Text('Sim'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o popup
+              },
+              child: Text('Cancelar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 
 void _showNotificationsModal() {
@@ -266,9 +302,9 @@ void _deleteNotification(int index) async {
 
 
   //List of the pages
-  List<Widget> pages = const [
+  /*List<Widget> pages = const [
     HomeScreen(),
-  ];
+  ];*/
 
 
   @override
@@ -282,7 +318,7 @@ void _deleteNotification(int index) async {
 
 
 void _loadItems() async {
-  
+
     final snapshot = await _databaseReference.get();
     if (snapshot.exists) {
       Map<dynamic, dynamic> drawers = snapshot.value as Map<dynamic, dynamic>;
@@ -318,7 +354,6 @@ void initState() {
 
 _loadItems();
     return Scaffold(
-
       backgroundColor: Color(0xFF1B1B1D),
 
       // APPBAR =================================================
@@ -329,35 +364,47 @@ _loadItems();
           children: [
             Column(
               //FOTO DE PERFIL
-              children: [
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Container(
-                  margin: const EdgeInsets.all(24),
-                  width: 50, //Tamanho da foto
-                  child: const CircleAvatar(
-                    radius: 25, //Raio da Foto
-                    backgroundColor: Colors.transparent,
-                    backgroundImage:
-                        ExactAssetImage('assets/images/profile.jpg'),
+
+            mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 60.0), // Espaçamento na parte superior do Container
+              child: GestureDetector(
+                onTap: () {
+                  // Chama o método para mostrar o popup de logout
+                  _showLogoutPopup();
+                },
+                child: Container(
+                  width: 40, // Largura do Container definida para 150 pixels
+                  height: 40, // Altura do Container definida para 150 pixels
+                  child: CircleAvatar(
+                    radius: 50, // Raio do CircleAvatar definido para 50 pixels
+                    backgroundImage: AssetImage('assets/images/profile2.jpg'),
+                   // clipBehavior: Clip.hardEdge, // Define o recorte da imagem
                   ),
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Color(0xFFA988F9),
-                        width: 2.0,
-                      )),
                 ),
-                )
-                
-              ],
+              ),
+            ), // Aqui termina o GestureDetector
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Chama o método para mostrar o popup de logout
+                _showLogoutPopup();
+              },
+              child: Text('Logout'),
+            ),
+          ],
+        
+      
+      
+              
             ),
             //NOME DO USUÁRIO
-            Text('Olá, Mari!',
+            Text('SmartGrid',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
-                  fontSize: 16,
+                  fontSize: 18,
                   fontFamily: 'Inter',
                 )),
             Spacer(),
@@ -395,8 +442,8 @@ _loadItems();
                       child: Image.asset(
                         // Use Image.asset para carregar uma imagem local
                         'assets/images/history_icon.png', // Caminho da imagem
-                        //width: 100, // Largura da imagem
-                        //height: 100, // Altura da imagem
+                        width: 40, // Largura da imagem
+                        height: 40, // Altura da imagem
                       ),
                     ),
                   ),
@@ -440,7 +487,7 @@ _loadItems();
                   fixedSize: Size(48, 48),
                   padding: EdgeInsets.all(0),
                   shape: CircleBorder(),
-                  backgroundColor: Colors.yellow,
+                  backgroundColor: Color(0xFFA988F9),
                   // Largura e altura fixas
                 ),
                 onPressed: (){
@@ -466,34 +513,23 @@ _loadItems();
             ),
 
             //BOTÃO DE PESQUISA
-            ElevatedButton(
-              //busca
-              style: ElevatedButton.styleFrom(
-                fixedSize: Size(72, 72),
-                padding: EdgeInsets.all(0),
-                shape: CircleBorder(),
-                backgroundColor: Color(0xFFA988F9),
-                // Largura e altura fixas
-              ),
-              onPressed: () {
+           ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    fixedSize: Size(72, 72),
+    padding: EdgeInsets.all(0),
+    shape: CircleBorder(),
+    backgroundColor: Color(0xFFA988F9),
+  ),
+  onPressed: () {
+    _navigateToSearchScreen();
+  },
+  child: Icon(
+    Icons.search,  // Ícone de busca
+    size: 36,      // Tamanho do ícone
+    color: Colors.black,  // Cor do ícone
+  ),
+),
 
-                 _navigateToSearchScreen();
-                /*Navigator.push(
-                    context,
-                    PageTransition(
-                        child: const search(),
-                        type: PageTransitionType.bottomToTop));*/
-              },
-
-              child: Container(
-                child: Image.asset(
-                  // Use Image.asset para carregar uma imagem local
-                  'assets/images/search.png', // Caminho da imagem
-                  //width: 100, // Largura da imagem
-                  //height: 100, // Altura da imagem
-                ),
-              ),
-            ),
             Container(
               margin: EdgeInsets.only(left: 24.0),
               child: ElevatedButton(
@@ -502,7 +538,7 @@ _loadItems();
                   fixedSize: Size(48, 48),
                   padding: EdgeInsets.all(0),
                   shape: CircleBorder(),
-                  backgroundColor: Colors.yellow,
+                  backgroundColor: Color(0xFFA988F9),
                   // Largura e altusra fixas
                 ),
                 onPressed: () {
