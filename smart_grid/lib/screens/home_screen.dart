@@ -11,11 +11,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:smart_grid/screens/search.dart';
-import 'package:smart_grid/screens/reports.dart';
-import 'package:smart_grid/screens/additem.dart';
+import 'package:smart_grid/screens/DrawerUsageReport.dart';
+import 'package:smart_grid/screens/AddNewItem.dart';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+
 
 
 
@@ -44,9 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int drawer = 2;
   List<String> notificationsList = [];
   //SharedPreferences prefs = await SharedPreferences.getInstance();
-
-
-
 
 
   void _addNotification(String mensagem) async {
@@ -331,7 +330,9 @@ _loadItems();
             Column(
               //FOTO DE PERFIL
               children: [
-                Container(
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Container(
                   margin: const EdgeInsets.all(24),
                   width: 50, //Tamanho da foto
                   child: const CircleAvatar(
@@ -346,7 +347,9 @@ _loadItems();
                         color: Color(0xFFA988F9),
                         width: 2.0,
                       )),
+                ),
                 )
+                
               ],
             ),
             //NOME DO USUÁRIO
@@ -440,7 +443,14 @@ _loadItems();
                   backgroundColor: Colors.yellow,
                   // Largura e altura fixas
                 ),
-                onPressed: (){}
+                onPressed: (){
+
+                  Navigator.push(
+                    context,
+                    PageTransition(
+                        child: DrawerUsageReport(),
+                        type: PageTransitionType.bottomToTop));
+                }
                 
               ,
                 child: Container(
@@ -493,13 +503,13 @@ _loadItems();
                   padding: EdgeInsets.all(0),
                   shape: CircleBorder(),
                   backgroundColor: Colors.yellow,
-                  // Largura e altura fixas
+                  // Largura e altusra fixas
                 ),
                 onPressed: () {
                 Navigator.push(
                     context,
                     PageTransition(
-                        child: const additem(),
+                        child:  AddItemScreen(),
                         type: PageTransitionType.bottomToTop));
               },
                 child: Container(
