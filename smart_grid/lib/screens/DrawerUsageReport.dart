@@ -33,25 +33,24 @@ class _DrawerUsageReportState extends State<DrawerUsageReport> {
     return Scaffold(
       backgroundColor: Color(0xFF1B1B1D),
       appBar: AppBar(
-        title: Text('Relatório de Uso das Gavetas', style: TextStyle(color: Colors.white),),
+        title: Text('Relatório de Uso ', style: TextStyle(color: Colors.white, fontFamily: 'Inter')),
         backgroundColor: Color(0xFF1B1B1D),
-        leading:   Container(
-                      height: 48,
-                      width: 48,
-                      margin: EdgeInsets.only(right: 1),
-                      child: IconButton(
-                      onPressed: ((){
-                        Navigator.push(
-                         context,
-                         MaterialPageRoute(builder: (context) => HomeScreen()), // Direciona para a Home Page
-                         );
-                      }), 
-                      icon: Icon(Icons.arrow_back_ios_new_rounded, ), padding: EdgeInsets.only(right: 3)),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFF4EFE9),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                    ),
+        leading: Container(
+         height: 20, // Altura reduzida
+  width: 20, // Largura reduzida
+  margin: EdgeInsets.only(left: 1),
+          child: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20), // Tamanho do ícone reduzido
+              padding: EdgeInsets.zero,), // Removendo o preenchimento
+              //padding: EdgeInsets.only(right: 3)),
+          decoration: BoxDecoration(
+            color: Color(0xFFF4EFE9),
+            borderRadius: BorderRadius.circular(50),
+          ),
+        ),
       ),
       body: FutureBuilder(
         future: _databaseReference.get(),
@@ -59,9 +58,9 @@ class _DrawerUsageReportState extends State<DrawerUsageReport> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Erro ao carregar os dados'));
+            return Center(child: Text('Erro ao carregar os dados', style: TextStyle(color: Colors.white, fontFamily: 'Inter')));
           } else if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text('Nenhum dado disponível'));
+            return Center(child: Text('Nenhum dado disponível', style: TextStyle(color: Colors.white, fontFamily: 'Inter')));
           } else {
             Map<dynamic, dynamic> drawers = {};
             if (snapshot.hasData && snapshot.data != null) {
@@ -69,7 +68,7 @@ class _DrawerUsageReportState extends State<DrawerUsageReport> {
             }
 
             if (drawers.isEmpty) {
-              return Center(child: Text('Nenhuma gaveta encontrada'));
+              return Center(child: Text('Nenhuma gaveta encontrada', style: TextStyle(color: Colors.white, fontFamily: 'Inter')));
             }
 
             int totalAccesses = 0;
@@ -84,12 +83,18 @@ class _DrawerUsageReportState extends State<DrawerUsageReport> {
               if (value['drawer_access'] != null) {
                 double percentage = (int.parse(value['drawer_access'].toString()) / totalAccesses) * 100;
                 data.add(DrawerUsageData(value['drawer_id'], percentage));
-                _colors.add(getRandomColor()); // Adicionar cor correspondente
               }
             });
 
             // Ordenar os dados pelos mais acessados
             data.sort((a, b) => b.percentage.compareTo(a.percentage));
+
+            // Gerar cores para os dados (uma única vez)
+            if (_colors.isEmpty) {
+              for (var _ in data) {
+                _colors.add(getRandomColor());
+              }
+            }
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -105,39 +110,60 @@ class _DrawerUsageReportState extends State<DrawerUsageReport> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 22.0),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      for (int i = 0; i < 3 && i < data.length; i++)
-                        Expanded(
-                          child: Card(
-                            child: Container(
-                              height: 80, // Altura para os cards destacados
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 5, // Largura reduzida para a barra vertical
-                                    color: _colors[i],
-                                  ),
-                                  SizedBox(width: 8),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                      Text(
+                        'Essas são suas gavetas mais usadas',
+                        style: TextStyle(fontSize: 25, color: Colors.white, fontFamily: 'Inter'),
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        children: [
+                          for (int i = 0; i < 3 && i < data.length; i++)
+                            Expanded(
+                              child: Card(
+                                color: Colors.transparent, // Torna o cartão transparente
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(color: Colors.white), // Borda branca
+                                ),
+                                child: Container(
+                                  height: 80, // Altura para os cards destacados
+                                  child: Row(
                                     children: [
-                                      Text(
-                                        'Gaveta ${data[i].drawerId}',
-                                        style: TextStyle(fontSize: 16),
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(24),
+                                          bottomLeft: Radius.circular(24),
+                                        ),
+                                        child: Container(
+                                          width: 10, // Largura aumentada para a barra vertical
+                                          color: _colors[i],
+                                        ),
                                       ),
-                                      Text(
-                                        '${data[i].percentage.toStringAsFixed(2)}% de uso',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                                      SizedBox(width: 8),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Gaveta ${data[i].drawerId}',
+                                            style: TextStyle(fontSize: 16, color: Colors.white), // Fonte branca
+                                          ),
+                                          Text(
+                                            '${data[i].percentage.toStringAsFixed(2)}% ',
+                                            style: TextStyle(fontSize: 14, color: Colors.white), // Fonte branca
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
-                          ),
-                        ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -150,13 +176,24 @@ class _DrawerUsageReportState extends State<DrawerUsageReport> {
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 4.0),
                         child: Card(
+                          color: Colors.transparent, // Torna o cartão transparente
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(color: Colors.white), // Borda branca
+                          ),
                           child: Container(
                             height: 60,
                             child: Row(
                               children: [
-                                Container(
-                                  width: 5, // Largura reduzida para a barra vertical
-                                  color: _colors[index], // Indicador de cor
+                                ClipRRect(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(24),
+                                    bottomLeft: Radius.circular(24),
+                                  ),
+                                  child: Container(
+                                    width: 10, // Largura aumentada para a barra vertical
+                                    color: _colors[index], // Indicador de cor
+                                  ),
                                 ),
                                 SizedBox(width: 8),
                                 Column(
@@ -165,11 +202,11 @@ class _DrawerUsageReportState extends State<DrawerUsageReport> {
                                   children: [
                                     Text(
                                       'Gaveta ${data[index].drawerId}',
-                                      style: TextStyle(fontSize: 16),
+                                      style: TextStyle(fontSize: 16, color: Colors.white), // Fonte branca
                                     ),
                                     Text(
                                       '${data[index].percentage.toStringAsFixed(2)}% de uso',
-                                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                                      style: TextStyle(fontSize: 14, color: Colors.white), // Fonte branca
                                     ),
                                   ],
                                 ),

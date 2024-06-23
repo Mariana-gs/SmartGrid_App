@@ -119,10 +119,12 @@ class _searchState extends State<search> {
                       margin: EdgeInsets.only(right: 24),
                       child: IconButton(
                       onPressed: ((){
-                        Navigator.push(
+                        Navigator.pop(context);
+
+                        /*Navigator.push(
                          context,
                          MaterialPageRoute(builder: (context) => HomeScreen()), // Direciona para a Home Page
-                         );
+                         );*/
                       }), 
                       icon: Icon(Icons.arrow_back_ios_new_rounded, ), padding: EdgeInsets.only(right: 3)),
                       decoration: BoxDecoration(
