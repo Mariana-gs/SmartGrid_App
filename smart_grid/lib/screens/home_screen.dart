@@ -167,7 +167,7 @@ void _showNotificationsModal() {
                   ),
                 ),
                 Text(
-                  'Notificações',
+                  'Histórico',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
@@ -206,7 +206,7 @@ void _showNotificationsModal() {
                     : Expanded(
                         child: Center(
                           child: Text(
-                            'Nenhuma notificação para exibir',
+                            'Nenhuma informação para exibir',
                             style: TextStyle(fontSize: 16, fontFamily: 'Inter'),
                           ),
                         ),
@@ -227,7 +227,7 @@ void _showNotificationsModal() {
                   _showNotificationsModal();
                 },
                 child: Text(
-                  'Limpar Notificações',
+                  'Limpar Histórico',
                   style: TextStyle(
                     color: Colors.black, // Cor do texto
                     fontFamily: 'Inter',
