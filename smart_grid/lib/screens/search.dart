@@ -254,7 +254,7 @@ class _searchState extends State<search> {
                                     // Ação ao clicar no botão de achar o item
                                      _updateDrawerId(result['drawerId']);
                                     print('Achar item: ${result['itemData']['name']}');
-                                    widget.addNotificationCallback('Item ' + result['itemData']['name'] + ' encontrado em ${DateTime.now()}');
+                                    widget.addNotificationCallback(result['itemData']['name'] + ' encontrado em ${DateTime.now()}');
                                   },
                                 ),
                                 TextButton.icon(
@@ -273,7 +273,7 @@ class _searchState extends State<search> {
                                      _deleteItem(result['itemData']['name']);
 
                                     print('Excluir item: ${result['itemData']['name']}');
-                                     widget.addNotificationCallback('Item ' + result['itemData']['name'] + ' excluído em ${DateTime.now()}');
+                                     widget.addNotificationCallback( result['itemData']['name'] + ' excluído em ${DateTime.now()}');
                                   },
                                 ),
                               ],

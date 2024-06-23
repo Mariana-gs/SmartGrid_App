@@ -626,7 +626,7 @@ _loadItems();
                                 onPressed: () {
                                   _updateDrawerId(result['drawerId']);
                                   print('Achar item: ${result['itemData']['name']}');
-                                   _addNotification('Item ' + result['itemData']['name'] + ' encontrado em ${DateTime.now()}');
+                                   _addNotification( result['itemData']['name'] + ' encontrado em ${DateTime.now()}');
                                 },
                               ),
                               TextButton.icon(
@@ -642,7 +642,7 @@ _loadItems();
                                 onPressed: () {
                                   _deleteItem(result['itemData']['name']);
                                   print('Excluir item: ${result['itemData']['name']}');
-                                  _addNotification('Item ' + result['itemData']['name'] + ' excluído em ${DateTime.now()}');
+                                  _addNotification( result['itemData']['name'] + ' excluído em ${DateTime.now()}');
                                 },
                               ),
                             ],
