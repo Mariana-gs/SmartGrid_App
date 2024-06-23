@@ -7,7 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class search extends StatefulWidget {
-  const search({super.key});
+  //const search({super.key});
+
+  final Function(String) addNotificationCallback; // Callback para adicionar notificação
+
+  const search({Key? key, required this.addNotificationCallback}) : super(key: key);
 
   @override
   State<search> createState() => _searchState();
@@ -250,6 +254,7 @@ class _searchState extends State<search> {
                                     // Ação ao clicar no botão de achar o item
                                      _updateDrawerId(result['drawerId']);
                                     print('Achar item: ${result['itemData']['name']}');
+                                    widget.addNotificationCallback('Item ' + result['itemData']['name'] + ' encontrado em ${DateTime.now()}');
                                   },
                                 ),
                                 TextButton.icon(
@@ -268,6 +273,7 @@ class _searchState extends State<search> {
                                      _deleteItem(result['itemData']['name']);
 
                                     print('Excluir item: ${result['itemData']['name']}');
+                                     widget.addNotificationCallback('Item ' + result['itemData']['name'] + ' excluído em ${DateTime.now()}');
                                   },
                                 ),
                               ],

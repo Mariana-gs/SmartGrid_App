@@ -15,6 +15,7 @@ import 'package:smart_grid/screens/reports.dart';
 import 'package:smart_grid/screens/additem.dart';
 
 import 'package:firebase_database/firebase_database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -26,8 +27,35 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+
+  void _navigateToSearchScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => search(
+          addNotificationCallback: _addNotification,
+        ),
+      ),
+    );
+  }
+  
   int _bottomNavIndex = 0;
   int drawer = 2;
+  List<String> notificationsList = [];
+  //SharedPreferences prefs = await SharedPreferences.getInstance();
+
+
+
+
+
+  void _addNotification(String mensagem) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  setState(() {
+    notificationsList.add(mensagem);
+    prefs.setStringList('notifications', notificationsList); // Salvar notificações no armazenamento
+  });
+}
 
   late DatabaseReference _databaseReference;
   List<Map<dynamic, dynamic>> _searchResults = [];
@@ -64,8 +92,16 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _databaseReference = FirebaseDatabase.instance.ref().child('drawer/drawers');
     _loadItems(); 
+    _loadNotifications();
     // Carrega os itens ao iniciar a tela
   }
+
+  void _loadNotifications() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  setState(() {
+    notificationsList = prefs.getStringList('notifications') ?? [];
+  });
+}
 
 
   void _updateDrawerId(int drawerId) async {
@@ -98,6 +134,135 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 
+void _showNotificationsModal() {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+    ),
+    builder: (BuildContext context) {
+      return DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.5, // Inicialmente ocupa metade da altura da tela
+        minChildSize: 0.25, // Altura mínima
+        maxChildSize: 0.9, // Altura máxima
+        builder: (BuildContext context, ScrollController scrollController) {
+          return Container(
+            decoration: BoxDecoration(
+              color: Color(0xFFF4EFE9), // Cor de fundo da modal
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)), // Borda arredondada
+            ),
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(bottom: 30),
+                  height: 4.0,
+                  width: 40.0,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400], // Cor do indicador
+                    borderRadius: BorderRadius.circular(2.0),
+                  ),
+                ),
+                Text(
+                  'Notificações',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                SizedBox(height: 16),
+                notificationsList.isNotEmpty
+                    ? Expanded(
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemCount: notificationsList.length,
+                          itemBuilder: (context, index) {
+                            final notification = notificationsList[index];
+                            if (notification != null) {
+                              return Card(
+                                color: Colors.white, // Cor do card
+                                child: ListTile(
+                                  title: Text(notification),
+                                  trailing: IconButton(
+                                    icon: Icon(Icons.close), // Ícone de "X"
+                                    onPressed: () {
+                                      _deleteNotification(index);
+                                      Navigator.pop(context);
+                                      _showNotificationsModal();
+                                    },
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return Container();
+                            }
+                          },
+                        ),
+                      )
+                    : Expanded(
+                        child: Center(
+                          child: Text(
+                            'Nenhuma notificação para exibir',
+                            style: TextStyle(fontSize: 16, fontFamily: 'Inter'),
+                          ),
+                        ),
+                      ),
+                if (notificationsList.isNotEmpty) SizedBox(height: 16),
+                if (notificationsList.isNotEmpty)
+                   ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFFFE27D), // Cor do botão
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(60), // Borda arredondada do botão
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 20), // Espaçamento interno vertical
+                ),
+                onPressed: () {
+                  _clearNotifications();
+                  Navigator.pop(context);
+                  _showNotificationsModal();
+                },
+                child: Text(
+                  'Limpar Notificações',
+                  style: TextStyle(
+                    color: Colors.black, // Cor do texto
+                    fontFamily: 'Inter',
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+
+
+
+
+void _clearNotifications() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  setState(() {
+    notificationsList.clear();
+    prefs.remove('notifications'); // Remover todas as notificações do armazenamento
+  });
+}
+
+void _deleteNotification(int index) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  setState(() {
+    notificationsList.removeAt(index);
+    prefs.setStringList('notifications', notificationsList);
+  });
+}
 
 
 
@@ -205,7 +370,8 @@ _loadItems();
                       // Largura e altura fixas
                     ),
                     onPressed: () {
-                      showModalBottomSheet(
+                      _showNotificationsModal();
+                      /*showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
                             return SizedBox(
@@ -219,34 +385,37 @@ _loadItems();
                                 child: const Text('Close'),
                               ),
                             );
-                          });
+                          });*/
                     },
                     child: Container(
                       //margin: EdgeInsets.only(right: 24.0),
                       child: Image.asset(
                         // Use Image.asset para carregar uma imagem local
-                        'assets/images/belliconpng.png', // Caminho da imagem
+                        'assets/images/history_icon.png', // Caminho da imagem
                         //width: 100, // Largura da imagem
                         //height: 100, // Altura da imagem
                       ),
                     ),
                   ),
-                  Positioned(
-                      right: 4, // Ajuste a posição horizontal
-                      top: 0, // Ajuste a posição vertical
-                      child: Container(
-                        padding: EdgeInsets.all(1), // Espaço ao redor do ponto
-                        decoration: BoxDecoration(
-                          color: Colors.yellow, // Cor da bolinha
-                          borderRadius:
-                              BorderRadius.circular(8), // Bordas arredondadas
-                        ),
-                        constraints: BoxConstraints(
-                          minWidth: 16, // Largura mínima
-                          minHeight: 16, // Altura mínima
-                        ),
-                      )),
-                ])),
+                  if (notificationsList.isNotEmpty) // Verifica se há notificações
+        Positioned(
+          right: 4,
+          top: 0,
+          child: Container(
+            padding: EdgeInsets.all(1),
+            decoration: BoxDecoration(
+              color: Colors.yellow,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            constraints: BoxConstraints(
+              minWidth: 16,
+              minHeight: 16,
+            ),
+          ),
+        ), // Fim do Positioned
+                ]
+                )
+                ),
           ],
         ),
       ),
@@ -297,11 +466,13 @@ _loadItems();
                 // Largura e altura fixas
               ),
               onPressed: () {
-                Navigator.push(
+
+                 _navigateToSearchScreen();
+                /*Navigator.push(
                     context,
                     PageTransition(
                         child: const search(),
-                        type: PageTransitionType.bottomToTop));
+                        type: PageTransitionType.bottomToTop));*/
               },
 
               child: Container(
@@ -455,6 +626,7 @@ _loadItems();
                                 onPressed: () {
                                   _updateDrawerId(result['drawerId']);
                                   print('Achar item: ${result['itemData']['name']}');
+                                   _addNotification('Item ' + result['itemData']['name'] + ' encontrado em ${DateTime.now()}');
                                 },
                               ),
                               TextButton.icon(
@@ -470,6 +642,7 @@ _loadItems();
                                 onPressed: () {
                                   _deleteItem(result['itemData']['name']);
                                   print('Excluir item: ${result['itemData']['name']}');
+                                  _addNotification('Item ' + result['itemData']['name'] + ' excluído em ${DateTime.now()}');
                                 },
                               ),
                             ],
