@@ -18,7 +18,7 @@ Você pode conferir o projeto de hardware aqui: [Repositório SmartGrid - Hardwa
 - Flutter
 - Firebase 
 
-## Telas do App
+## Telas do Aplicativo
 
 <img width="189" alt="SmartGrid_SplashScreen" src="https://github.com/Mariana-gs/SmartGrid_App/assets/81964220/169a78bf-1cd6-4ec4-8644-a0d00c148094">
 
